@@ -1,15 +1,17 @@
 import logging
+import openai
 import re
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
-
-# Ваш ключ API для OpenRouter
-OPENROUTER_API_KEY = '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'
+from config import OPENROUTER_API_KEY
 
 # Инициализация клиента OpenRouter
 from openai import OpenAI
-client = OpenAI(base_url="https://openrouter.ai/api/v1", api_key=OPENROUTER_API_KEY)
-
+client = openai.OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=OPENROUTER_API_KEY,  # Убедись, что ключ не пустой!
+    default_headers={"Authorization": f"Bearer {OPENROUTER_API_KEY}"}
+)
 # Словарь для хранения прогресса пользователей
 user_progress = {}
 
@@ -49,7 +51,7 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 def generate_case():
     try:
         prompt = ("Ты — помощник для студентов-психологов, который генерирует кейсы для практики, дает обратную связь, подмечая плюсы и минусы решения, и рекомендации по его улучшению. "
-        "Напиши пользователю короткий терапевтический кейс и ожидай решения пользователя. Формат кейса: Название. Описание."
+        "Напиши пользователю короткий терапевтический кейс на основе информации из книги Когнитивно-поведенческая терапия. От основ к направлениям. Джудит Бек. 3-е издание 2024 г. и ожидай решения пользователя. Формат кейса: Название. Описание."
         "Не используй форматирование (**, [], и т.д.).")
         completion = client.chat.completions.create(
             model="deepseek/deepseek-r1:free",  # Модель которую будете использовать
